@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Progress } from "./ui/progress"; // Adjust the import path as necessary
 
 type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
@@ -103,13 +104,8 @@ const MainGameComponent = () => {
             <h2 className="text-xl mb-2">Lives: {lives}</h2>
           </div>
 
-          {/* Timer Progress Bar */}
-          <div className="w-full h-4 bg-gray-300 rounded-full mb-4 overflow-hidden">
-            <div
-              className="h-full bg-green-500 transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
+          {/* ShadCN Progress Bar for Time Left */}
+          <Progress value={progressPercentage} className="w-[60%] h-4 mb-4" />
 
           <div className="question">
             <h2 className="text-2xl mb-4">{question}</h2>
@@ -149,16 +145,16 @@ const MainGameComponent = () => {
 
 export default MainGameComponent;
 
-
 // "use client";
 
 // import { useState, useEffect } from "react";
+// import { Progress } from "./ui/progress";
 
 // type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
 // const MainGameComponent = () => {
 //   const [question, setQuestion] = useState("");
-//   const [answer, setAnswer] = useState(0);
+//   const [answer, setAnswer] = useState(0); // Ensuring answer is always a number
 //   const [score, setScore] = useState(0);
 //   const [timeLeft, setTimeLeft] = useState(30);
 //   const [input, setInput] = useState("");
@@ -188,7 +184,7 @@ export default MainGameComponent;
 //     const selectedOperator =
 //       operators[Math.floor(Math.random() * operators.length)];
 
-//     let newAnswer;
+//     let newAnswer: number = 0; // Initialize newAnswer as a number
 
 //     switch (selectedOperator) {
 //       case "+":
@@ -206,6 +202,9 @@ export default MainGameComponent;
 //         setQuestion(`${divisibleNum1} / ${num2}`);
 //         break;
 //       default:
+//         // Ensure default case sets some valid question and answer
+//         newAnswer = num1 + num2; // Default to addition in case of an error
+//         setQuestion(`${num1} + ${num2}`);
 //         break;
 //     }
 
@@ -213,7 +212,7 @@ export default MainGameComponent;
 //       setQuestion(`${num1} ${selectedOperator} ${num2}`);
 //     }
 
-//     setAnswer(newAnswer);
+//     setAnswer(newAnswer); // Set answer to a valid number
 //   };
 
 //   const startGame = () => {
