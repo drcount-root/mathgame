@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Progress } from "./ui/progress"; // Adjust the import path as necessary
-import { ModeToggle } from "./ModeToggle";
+// import { ModeToggle } from "./ModeToggle";
 
 type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
@@ -96,9 +96,9 @@ const MainGameComponent = () => {
 
   return (
     <>
-      <div className="absolute top-4 right-4">
+      {/* <div className="absolute top-4 right-4">
         <ModeToggle />
-      </div>
+      </div> */}
       <div className="flex flex-col items-center justify-center h-screen">
         <h1 className="text-3xl font-bold mb-6 text-center">
           Math Quest: Equation Explorer

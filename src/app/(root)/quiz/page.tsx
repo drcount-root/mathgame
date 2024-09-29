@@ -1,6 +1,6 @@
 import MainGameComponent from "@/components/MainGameComponent";
 
-const Home = () => {
+const Quiz = () => {
   return (
     <>
       <MainGameComponent />
@@ -8,4 +8,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Quiz;
