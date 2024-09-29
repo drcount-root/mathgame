@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "1727628319883",
+      "name": "Subham Sahu",
+      "email": "about.subhamsahu@gmail.com",
+      "password": "$2a$10$k8gf9PuNF8ZzuiS.6VUiXuzHqhluqNnz2cvuLc4GE0m9m29Xj4Nmu",
+      "country": "INDIA",
+      "age": "26"
+    },
+    {
+      "id": "1727631541774",
+      "name": "Prachi",
+      "email": "prachi@gmail.com",
+      "password": "$2a$10$jHabmnYfwnzawGG/DODSS.Do8O8FdGxJukuXufMWhlXwDJKdB8S/.",
+      "country": "INDIA",
+      "age": "24"
+    }
+  ]
+}

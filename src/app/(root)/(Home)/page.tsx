@@ -76,15 +76,27 @@ export default function Home() {
             </Link>
           </p>
           <div className="flex gap-4">
-            <a href="#" className="text-foreground hover:text-primary">
+            <Link
+              href="https://github.com/drcount-root"
+              target="_blank"
+              className="text-foreground hover:text-primary"
+            >
               <GithubIcon />
-            </a>
-            <a href="#" className="text-foreground hover:text-primary">
+            </Link>
+            <Link
+              href="https://twitter.com/about_subham"
+              target="_blank"
+              className="text-foreground hover:text-primary"
+            >
               <TwitterIcon />
-            </a>
-            <a href="#" className="text-foreground hover:text-primary">
+            </Link>
+            <Link
+              href="https://www.linkedin.com/in/about-subham-sahu/"
+              target="_blank"
+              className="text-foreground hover:text-primary"
+            >
               <LinkedinIcon />
-            </a>
+            </Link>
           </div>
         </footer>
       </div>
