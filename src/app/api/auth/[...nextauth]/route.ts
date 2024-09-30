@@ -1,16 +1,18 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import fs from "fs/promises";
-import path from "path";
+// import fs from "fs/promises";
+// import path from "path";
+import connectMongo from "@/lib/mongodb";
+import { User } from "@/models/User";
 
-// Path to db.json
-const dbPath = path.join(process.cwd(), "src/db/db.json");
+// // Path to db.json
+// const dbPath = path.join(process.cwd(), "src/db/db.json");
 
-async function readDB() {
-  const data = await fs.readFile(dbPath, "utf-8");
-  return JSON.parse(data);
-}
+// async function readDB() {
+//   const data = await fs.readFile(dbPath, "utf-8");
+//   return JSON.parse(data);
+// }
 
 const handler = NextAuth({
   providers: [
@@ -22,10 +24,15 @@ const handler = NextAuth({
       },
       async authorize(credentials: any) {
         try {
-          const db = await readDB();
-          const user = db.users.find(
-            (user: any) => user.email === credentials?.email
-          );
+          // const db = await readDB();
+          // const user = db.users.find(
+          //   (user: any) => user.email === credentials?.email
+          // );
+
+          await connectMongo();
+
+          // Find the user in MongoDB by email
+          const user = await User.findOne({ email: credentials?.email });
 
           if (!user) {
             throw new Error("No user found");
@@ -40,7 +47,14 @@ const handler = NextAuth({
             throw new Error("Invalid password");
           }
 
-          return { id: user.id, name: user.name, email: user.email };
+          // return { id: user.id, name: user.name, email: user.email };
+
+          // Return user object without password
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+          };
         } catch (error) {
           console.error("Authorization error:", error); // Log the error
           throw new Error("Login failed");
