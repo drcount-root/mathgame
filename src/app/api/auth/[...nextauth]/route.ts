@@ -33,6 +33,7 @@ const handler = NextAuth({
 
           // Find the user in MongoDB by email
           const user = await User.findOne({ email: credentials?.email });
+          console.log("user", user);
 
           if (!user) {
             throw new Error("No user found");
@@ -54,6 +55,7 @@ const handler = NextAuth({
             id: user._id.toString(),
             name: user.name,
             email: user.email,
+            scores: user.scores,
           };
         } catch (error) {
           console.error("Authorization error:", error); // Log the error
@@ -94,14 +96,16 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
+        token.scores = user.scores;
       }
       return token;
     },
     async session({ session, token }: any) {
       session.user.id = token.id;
+      session.user.scores = token.scores;
       return session;
     },
   },
