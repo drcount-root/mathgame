@@ -29,6 +29,14 @@ export async function POST(req: Request) {
     // Log the incoming data for debugging
     console.log("Incoming signup data:", { name, email, country, age });
 
+    // Validate required fields
+    if (!name || !email || !password || !country || !age) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
     // // Check if user already exists
     // const existingUser = db.users.find((user: any) => user.email === email);
     // if (existingUser) {
@@ -38,14 +46,14 @@ export async function POST(req: Request) {
     //   );
     // }
 
-     // Check if user already exists
-     const existingUser = await User.findOne({ email });
-     if (existingUser) {
-       return NextResponse.json(
-         { error: "User already exists" },
-         { status: 400 }
-       );
-     }
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
 
     // Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -59,13 +67,14 @@ export async function POST(req: Request) {
     //   age,
     // };
 
-     // Create a new user
-     const newUser = new User({
+    // Create a new user
+    const newUser = new User({
       name,
       email,
       password: hashedPassword,
       country,
       age,
+      scores: [], // Optionally, initialize with default scores
     });
 
     // // Add new user to db.json
