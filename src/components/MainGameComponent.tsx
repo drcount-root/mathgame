@@ -7,19 +7,20 @@ type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
 const MainGameComponent = () => {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState(0); // Ensuring answer is always a number
-  const [score, setScore] = useState(0);
+  const [answer, setAnswer] = useState(0);
+  const [totalScore, setTotalScore] = useState(0); // Track total cumulative score
+  const [levelScore, setLevelScore] = useState(0); // Track score for the current level
   const [timeLeft, setTimeLeft] = useState(30);
   const [input, setInput] = useState("");
   const [isGameActive, setIsGameActive] = useState(false);
   const [lives, setLives] = useState(3);
-  const [level, setLevel] = useState(1); // Add a level state
+  const [level, setLevel] = useState(1);
+  const [levelScores, setLevelScores] = useState<number[]>([]); // Store level-wise scores
 
-  // Define time limits for each level
-  const levelTimeLimits = [30, 60, 120]; // Time limits for level 1, 2, and 3 respectively
-  const maxTime = levelTimeLimits[level - 1]; // Set max time based on level
+  const levelTimeLimits = [30, 60, 90]; // Time limits for each level
+  const maxTime = levelTimeLimits[level - 1];
 
-  // Timer logic
+  // Handle timer and level transitions
   useEffect(() => {
     if (isGameActive && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -28,18 +29,22 @@ const MainGameComponent = () => {
       return () => clearInterval(timer);
     }
     if (timeLeft === 0) {
-      // Automatically progress to the next level
       if (level < 3) {
+        setLevelScores((prev) => [...prev, levelScore]); // Store score for the current level
+        setLevelScore(0); // Reset level score for the next level
         setLevel((prevLevel) => prevLevel + 1);
-        setTimeLeft(levelTimeLimits[level]); // Reset time for the next level
-        generateQuestion(level + 1); // Generate question for the next level
+        setTimeLeft(levelTimeLimits[level]);
+        generateQuestion(level + 1);
       } else {
+        // Store final level score and stop the game without adding an extra score
+        if (levelScores.length < 3) {
+          setLevelScores((prev) => [...prev, levelScore]); // Store final level score
+        }
         setIsGameActive(false); // End game if level 3 is reached
       }
     }
-  }, [timeLeft, isGameActive, level]);
+  }, [timeLeft, isGameActive, level, levelScore]);
 
-  // Generate random math question
   const generateQuestion = (level: number) => {
     let numbers: number[] = [];
     const operators = ["+", "-", "*", "/"];
@@ -63,7 +68,8 @@ const MainGameComponent = () => {
 
     for (let i = 1; i < numCount; i++) {
       // Randomly select an operator
-      const selectedOperator = operators[Math.floor(Math.random() * operators.length)];
+      const selectedOperator =
+        operators[Math.floor(Math.random() * operators.length)];
       expression += ` ${selectedOperator} ${numbers[i]}`;
 
       // Evaluate the expression while ensuring proper handling of division
@@ -89,29 +95,35 @@ const MainGameComponent = () => {
   };
 
   const startGame = () => {
-    setScore(0);
+    setTotalScore(0); // Reset total score
+    setLevelScore(0); // Reset level score
     setLives(3);
-    setLevel(1); // Reset level to 1
+    setLevel(1);
+    setLevelScores([]); // Reset level-wise scores
     setTimeLeft(maxTime);
     setIsGameActive(true);
-    generateQuestion(1); // Start with level 1
+    generateQuestion(1);
   };
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     if (parseInt(input) === answer) {
-      setScore(score + 1);
-      generateQuestion(level); // Generate question for the current level
+      setTotalScore(totalScore + 1); // Update total score
+      setLevelScore(levelScore + 1); // Update current level's score
+      generateQuestion(level);
     } else {
       setLives(lives - 1);
       if (lives - 1 === 0) {
+        // Ensure no extra level is added if lives run out at level 3
+        if (levelScores.length < 3) {
+          setLevelScores((prev) => [...prev, levelScore]); // Store final level score
+        }
         setIsGameActive(false);
       }
     }
     setInput("");
   };
 
-  // Calculate progress for the progress bar
   const progressPercentage = (timeLeft / maxTime) * 100;
 
   return (
@@ -122,22 +134,19 @@ const MainGameComponent = () => {
       {isGameActive ? (
         <>
           <div className="flex flex-col items-center mb-4">
-            <h2 className="text-xl mb-2">Score: {score}</h2>
+            <h2 className="text-xl mb-2">Total Score: {totalScore}</h2>
             <h2 className="text-xl mb-2">Time Left: {timeLeft}</h2>
             <h2 className="text-xl mb-2">Lives: {lives}</h2>
             <h2 className="text-xl mb-2">Level: {level}</h2>
+            <h2 className="text-xl mb-2">Level Score: {levelScore}</h2>
           </div>
 
-          {/* ShadCN Progress Bar for Time Left */}
           <Progress value={progressPercentage} className="w-[60%] h-4 mb-4" />
 
           <div className="question">
             <h2 className="text-2xl mb-4">{question}</h2>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col items-center"
-          >
+          <form onSubmit={handleSubmit} className="flex flex-col items-center">
             <input
               type="number"
               className="border border-gray-300 p-2 mb-4"
@@ -162,7 +171,19 @@ const MainGameComponent = () => {
             Start Game
           </button>
           {timeLeft === 0 || lives === 0 ? (
-            <h2 className="text-2xl mt-6">Game Over! Your score: {score}</h2>
+            <div className="mt-6">
+              <h2 className="text-2xl">
+                Game Over! Your total score: {totalScore}
+              </h2>
+              <h3 className="text-xl mt-4">Level-wise Scores:</h3>
+              <ul>
+                {levelScores.map((levelScore, index) => (
+                  <li key={index} className="text-lg">
+                    Level {index + 1}: {levelScore}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </>
       )}
@@ -171,221 +192,3 @@ const MainGameComponent = () => {
 };
 
 export default MainGameComponent;
-
-// Not following BODMAS properly. For 9-5/5, its not accepting 8 as answer.
-
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { Progress } from "./ui/progress"; // Adjust the import path as necessary
-
-// type SubmitEvent = React.FormEvent<HTMLFormElement>;
-
-// const MainGameComponent = () => {
-//   const [question, setQuestion] = useState("");
-//   const [answer, setAnswer] = useState(0); // Ensuring answer is always a number
-//   const [score, setScore] = useState(0);
-//   const [timeLeft, setTimeLeft] = useState(30);
-//   const [input, setInput] = useState("");
-//   const [isGameActive, setIsGameActive] = useState(false);
-//   const [lives, setLives] = useState(3);
-//   const [level, setLevel] = useState(1); // Add a level state
-
-//   // Define time limits for each level
-//   const levelTimeLimits = [30, 60, 120]; // Time limits for level 1, 2, and 3 respectively
-//   const maxTime = levelTimeLimits[level - 1]; // Set max time based on level
-
-//   // Timer logic
-//   useEffect(() => {
-//     if (isGameActive && timeLeft > 0) {
-//       const timer = setInterval(() => {
-//         setTimeLeft((prev) => prev - 1);
-//       }, 1000);
-//       return () => clearInterval(timer);
-//     }
-//     if (timeLeft === 0) {
-//       // Automatically progress to the next level
-//       if (level < 3) {
-//         setLevel((prevLevel) => prevLevel + 1);
-//         setTimeLeft(levelTimeLimits[level]); // Reset time for the next level
-//         generateQuestion(level + 1); // Generate question for the next level
-//       } else {
-//         setIsGameActive(false); // End game if level 3 is reached
-//       }
-//     }
-//   }, [timeLeft, isGameActive, level]);
-
-//   // Generate random math question
-//   const generateQuestion = (level: number) => {
-//     let num1, num2, num3, num4, num5;
-//     const operators = ["+", "-", "*", "/"];
-//     let newAnswer: number = 0; // Initialize newAnswer as a number
-
-//     switch (level) {
-//       case 1:
-//         // Level 1: Two numbers
-//         num1 = Math.floor(Math.random() * 10) + 1; // 1-10
-//         num2 = Math.floor(Math.random() * 10) + 1; // 1-10
-//         break;
-//       case 2:
-//         // Level 2: Three numbers
-//         num1 = Math.floor(Math.random() * 10) + 1;
-//         num2 = Math.floor(Math.random() * 10) + 1;
-//         num3 = Math.floor(Math.random() * 10) + 1;
-//         break;
-//       case 3:
-//         // Level 3: Four or Five numbers
-//         num1 = Math.floor(Math.random() * 10) + 1;
-//         num2 = Math.floor(Math.random() * 10) + 1;
-//         num3 = Math.floor(Math.random() * 10) + 1;
-//         num4 = Math.floor(Math.random() * 10) + 1; // 1-10
-//         num5 = Math.floor(Math.random() * 10) + 1; // 1-10
-//         break;
-//       default:
-//         throw new Error("Invalid level");
-//     }
-
-//     // Randomly select an operator for the first two numbers
-//     const selectedOperator1 = operators[Math.floor(Math.random() * operators.length)];
-
-//     // Handle the division case separately to ensure it meets the criteria
-//     if (selectedOperator1 === "/") {
-//       // Ensure m / n where m % n === 0
-//       num1 = Math.floor(Math.random() * 90) + 10; // m (10-100)
-//       num2 = Math.floor(Math.random() * 9) + 1; // n (1-9)
-//       num1 = num1 - (num1 % num2); // Make sure m is divisible by n
-//       newAnswer = num1 / num2;
-//       setQuestion(`${num1} / ${num2}`);
-//     } else {
-//       // For addition, subtraction, or multiplication
-//       switch (selectedOperator1) {
-//         case "+":
-//           newAnswer = num1 + num2;
-//           break;
-//         case "-":
-//           newAnswer = num1 - num2;
-//           break;
-//         case "*":
-//           newAnswer = num1 * num2;
-//           break;
-//       }
-//       setQuestion(`${num1} ${selectedOperator1} ${num2}`);
-//     }
-
-//     // Handle the case for three or more numbers
-//     if (level > 1) {
-//       const selectedOperator2 = operators[Math.floor(Math.random() * operators.length)];
-//       // Here, you can combine the first operation with the next number
-//       let intermediateAnswer = newAnswer; // Start with the previous answer
-//       switch (selectedOperator2) {
-//         case "+":
-//           intermediateAnswer += num3; // Add next number
-//           setQuestion((prev) => `${prev} + ${num3}`);
-//           break;
-//         case "-":
-//           intermediateAnswer -= num3; // Subtract next number
-//           setQuestion((prev) => `${prev} - ${num3}`);
-//           break;
-//         case "*":
-//           intermediateAnswer *= num3; // Multiply next number
-//           setQuestion((prev) => `${prev} * ${num3}`);
-//           break;
-//         case "/":
-//           // Ensure divisibility for the next division
-//           num3 = Math.floor(Math.random() * 90) + 10;
-//           num4 = Math.floor(Math.random() * 9) + 1;
-//           num3 = num3 - (num3 % num4);
-//           intermediateAnswer = intermediateAnswer / num4;
-//           setQuestion((prev) => `${prev} / ${num4}`);
-//           break;
-//       }
-//       newAnswer = intermediateAnswer; // Update newAnswer with the intermediate answer
-//     }
-
-//     // Set final answer
-//     setAnswer(newAnswer);
-//   };
-
-//   const startGame = () => {
-//     setScore(0);
-//     setLives(3);
-//     setLevel(1); // Reset level to 1
-//     setTimeLeft(maxTime);
-//     setIsGameActive(true);
-//     generateQuestion(1); // Start with level 1
-//   };
-
-//   const handleSubmit = (e: SubmitEvent) => {
-//     e.preventDefault();
-//     if (parseInt(input) === answer) {
-//       setScore(score + 1);
-//       generateQuestion(level); // Generate question for the current level
-//     } else {
-//       setLives(lives - 1);
-//       if (lives - 1 === 0) {
-//         setIsGameActive(false);
-//       }
-//     }
-//     setInput("");
-//   };
-
-//   // Calculate progress for the progress bar
-//   const progressPercentage = (timeLeft / maxTime) * 100;
-
-//   return (
-//     <div className="flex flex-col items-center justify-center h-screen">
-//       <h1 className="text-3xl font-bold mb-6 text-center">
-//         Math Quest: Equation Explorer
-//       </h1>
-//       {isGameActive ? (
-//         <>
-//           <div className="flex flex-col items-center mb-4">
-//             <h2 className="text-xl mb-2">Score: {score}</h2>
-//             <h2 className="text-xl mb-2">Time Left: {timeLeft}</h2>
-//             <h2 className="text-xl mb-2">Lives: {lives}</h2>
-//             <h2 className="text-xl mb-2">Level: {level}</h2>
-//           </div>
-
-//           {/* ShadCN Progress Bar for Time Left */}
-//           <Progress value={progressPercentage} className="w-[60%] h-4 mb-4" />
-
-//           <div className="question">
-//             <h2 className="text-2xl mb-4">{question}</h2>
-//           </div>
-//           <form
-//             onSubmit={handleSubmit}
-//             className="flex flex-col items-center"
-//           >
-//             <input
-//               type="number"
-//               className="border border-gray-300 p-2 mb-4"
-//               value={input}
-//               onChange={(e) => setInput(e.target.value)}
-//               required
-//             />
-//             <button
-//               type="submit"
-//               className="bg-blue-500 text-white px-4 py-2 rounded"
-//             >
-//               Submit
-//             </button>
-//           </form>
-//         </>
-//       ) : (
-//         <>
-//           <button
-//             onClick={startGame}
-//             className="bg-blue-500 text-white px-6 py-3 rounded mt-8"
-//           >
-//             Start Game
-//           </button>
-//           {timeLeft === 0 || lives === 0 ? (
-//             <h2 className="text-2xl mt-6">Game Over! Your score: {score}</h2>
-//           ) : null}
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default MainGameComponent;
