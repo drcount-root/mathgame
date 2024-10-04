@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Progress } from "./ui/progress"; // Adjust the import path as necessary
+import { useSession } from "next-auth/react";
 
 type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
@@ -10,14 +11,16 @@ const MainGameComponent = () => {
   const [answer, setAnswer] = useState(0);
   const [totalScore, setTotalScore] = useState(0); // Track total cumulative score
   const [levelScore, setLevelScore] = useState(0); // Track score for the current level
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(10);
   const [input, setInput] = useState("");
   const [isGameActive, setIsGameActive] = useState(false);
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
   const [levelScores, setLevelScores] = useState<number[]>([]); // Store level-wise scores
+  const [message, setMessage] = useState<string>("");
+  const { data: session } = useSession();
 
-  const levelTimeLimits = [30, 60, 90]; // Time limits for each level
+  const levelTimeLimits = [10, 10, 10]; // Time limits for each level
   const maxTime = levelTimeLimits[level - 1];
 
   // Handle timer and level transitions
@@ -40,10 +43,47 @@ const MainGameComponent = () => {
         if (levelScores.length < 3) {
           setLevelScores((prev) => [...prev, levelScore]); // Store final level score
         }
+
+        if (levelScores.length === 3) {
+          saveScoresFunction();
+        }
+
         setIsGameActive(false); // End game if level 3 is reached
       }
     }
   }, [timeLeft, isGameActive, level, levelScore]);
+
+  const saveScoresFunction = async () => {
+    if (session?.user) {
+      try {
+        const response = await fetch("/api/user/scores", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            scores: levelScores.map((score, index) => ({
+              level: index + 1,
+              score: score,
+            })),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update scores");
+        }
+
+        const data = await response.json();
+        setMessage("Scores updated successfully!");
+        console.log("Scores updated:", data.scores);
+      } catch (error) {
+        console.error("Error updating scores:", error);
+        setMessage("Failed to update scores. Please try again.");
+      }
+    } else {
+      setMessage("Sign in to save your scores!");
+    }
+  };
 
   const generateQuestion = (level: number) => {
     let numbers: number[] = [];
@@ -95,6 +135,7 @@ const MainGameComponent = () => {
   };
 
   const startGame = () => {
+    setMessage("");
     setTotalScore(0); // Reset total score
     setLevelScore(0); // Reset level score
     setLives(3);
@@ -105,7 +146,7 @@ const MainGameComponent = () => {
     generateQuestion(1);
   };
 
-  const handleSubmit = (e: SubmitEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     if (parseInt(input) === answer) {
       setTotalScore(totalScore + 1); // Update total score
@@ -125,6 +166,8 @@ const MainGameComponent = () => {
   };
 
   const progressPercentage = (timeLeft / maxTime) * 100;
+
+  console.log("levelScores", levelScores);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
