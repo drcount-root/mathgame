@@ -92,9 +92,9 @@ const AuthFormComponent: React.FC<AuthFormComponentProps> = ({ formType }) => {
   };
 
   // Show loading state while session status is being determined
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
+  // if (status === "loading") {
+  // return <div>Loading...</div>;
+  // }
 
   // Redirect if already logged in
   if (status === "authenticated") {
@@ -103,7 +103,7 @@ const AuthFormComponent: React.FC<AuthFormComponentProps> = ({ formType }) => {
   }
 
   return (
-        <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-3xl font-bold mb-6">
         {formType === "signup" ? "Sign Up" : "Login"}
       </h1>

@@ -19,10 +19,10 @@ const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
     }
   }, [status, router]);
 
-  if (status === "loading") {
-    // Optionally, show a loading state while checking the session
-    return <div>Loading...</div>;
-  }
+  //   if (status === "loading") {
+  // Optionally, show a loading state while checking the session
+  // return <div>Loading...</div>;
+  //   }
 
   if (session) {
     // If authenticated, render the protected content

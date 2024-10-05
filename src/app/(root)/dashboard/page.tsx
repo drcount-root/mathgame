@@ -15,12 +15,16 @@ const page = () => {
     }
   }, [status, router]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>; // Show loading state while checking session
-  }
+  // if (status === "loading") {
+  // return <div>Loading...</div>; // Show loading state while checking session
+  // }
 
   if (session) {
-    return <div>Welcome to the Dashboard, {session.user?.name}!</div>;
+    return (
+      <div>
+        <h1 className="text-3xl text-yellow-500 font-semibold">Welcome to the Dashboard, {session.user?.name}!</h1>
+      </div>
+    );
   }
 
   return null; // If unauthenticated, this won't show because of the redirect
