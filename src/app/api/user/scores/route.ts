@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import connectMongo from "@/lib/mongodb";
 import { User } from "@/models/User";
+import { authOptions } from "@/lib/auth";
 
 export async function PUT(req: NextRequest) {
   try {
     // Check if the user is authenticated
-    const session = await getServerSession();
+    // const session = await getServerSession();
+    // if (!session || !session.user) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
+    // Authenticate the user using getServerSession with authOptions
+    const session = await getServerSession(authOptions); // Pass the authOptions explicitly
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
