@@ -3,12 +3,13 @@
 import { SessionProvider, useSession } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const RouteGuard = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession(); // Session data and status
+  const [loading, setLoading] = useState(true); // Initialize loading state
 
   const protectedRoutes = ["/dashboard", "/quiz"]; // Add more protected routes if needed
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -17,12 +18,26 @@ const RouteGuard = () => {
 
   // Redirect to login if user is not authenticated and trying to access protected routes
   useEffect(() => {
-    if (isProtectedRoute && status === "unauthenticated") {
+    if (status === "loading") {
+      // Set loading state to true while checking session status
+      setLoading(true);
+    } else if (isProtectedRoute && status === "unauthenticated") {
       router.push("/login");
+    } else {
+      setLoading(false); // Set loading state to false if authenticated or on a public route
     }
   }, [pathname, session, status]);
 
-  return null; // This component doesn't need to render anything
+  // Show loading state if checking session
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  return null; // This component doesn't need to render anything else
 };
 
 export function Providers({ children }: { children: React.ReactNode }) {
