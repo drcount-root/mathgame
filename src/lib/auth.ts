@@ -18,14 +18,18 @@ export const authOptions: NextAuthOptions = {
 
           // Fetch the user from the database
           const user = await User.findOne({ email: credentials?.email });
-          if (!user) throw new Error("No user found");
+          if (!user) {
+            throw new Error("No user found with that email");
+          }
 
           // Check password validity
           const isValidPassword = await bcrypt.compare(
             credentials?.password,
             user.password
           );
-          if (!isValidPassword) throw new Error("Invalid password");
+          if (!isValidPassword) {
+            throw new Error("Incorrect password");
+          }
 
           // Return the user without password
           return {
@@ -34,9 +38,9 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             scores: user.scores || [],
           };
-        } catch (error) {
-          console.error("Authorization error:", error);
-          return null; // Null will result in failed login
+        } catch (error: any) {
+          console.error("Authorization error:", error.message);
+          throw new Error(error.message); // Pass the error message back
         }
       },
     }),
@@ -65,3 +69,31 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || "secr3t",
 };
+
+//   async authorize(credentials: any) {
+//     try {
+//       await connectMongo();
+
+//       // Fetch the user from the database
+//       const user = await User.findOne({ email: credentials?.email });
+//       if (!user) throw new Error("No user found");
+
+//       // Check password validity
+//       const isValidPassword = await bcrypt.compare(
+//         credentials?.password,
+//         user.password
+//       );
+//       if (!isValidPassword) throw new Error("Invalid password");
+
+//       // Return the user without password
+//       return {
+//         id: user._id.toString(),
+//         name: user.name,
+//         email: user.email,
+//         scores: user.scores || [],
+//       };
+//     } catch (error) {
+//       console.error("Authorization error:", error);
+//       return null; // Null will result in failed login
+//     }
+//   },
