@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Progress } from "./ui/progress"; // Adjust the import path as necessary
 import { useSession } from "next-auth/react";
+import { Button } from "./ui/button";
 
 type SubmitEvent = React.FormEvent<HTMLFormElement>;
 
@@ -179,7 +180,7 @@ const MainGameComponent = () => {
   console.log("levelScores", levelScores);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-[60vh]">
       <h1 className="text-3xl font-bold mb-6 text-center">
         Math Quest: Equation Explorer
       </h1>
@@ -216,12 +217,13 @@ const MainGameComponent = () => {
         </>
       ) : (
         <>
-          <button
+          <Button
             onClick={startGame}
-            className="bg-blue-500 text-white px-6 py-3 rounded mt-8"
+            variant={"outline"}
+            className="text-yellow-500 rounded mt-8"
           >
             Start Game
-          </button>
+          </Button>
           {timeLeft === 0 || lives === 0 ? (
             <div className="mt-6">
               <h2 className="text-2xl">

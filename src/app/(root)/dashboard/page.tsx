@@ -1,6 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -21,8 +23,13 @@ const page = () => {
 
   if (session) {
     return (
-      <div>
-        <h1 className="text-3xl text-yellow-500 font-semibold">Welcome to the Dashboard, {session.user?.name}!</h1>
+      <div className="flex flex-col justify-center items-center">
+        <h1 className="text-3xl text-yellow-500 font-semibold">
+          Welcome to the Dashboard, {session.user?.name}!
+        </h1>
+        <Button variant={"outline"} onClick={() => router.push("/quiz")} className="mt-36 text-lg text-yellow-500">
+          Go to quiz
+        </Button>
       </div>
     );
   }

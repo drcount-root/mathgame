@@ -22,6 +22,13 @@ const NavBar = () => {
           MathMatrix
         </Link>
         <nav className="flex gap-4">
+          <Button
+            variant="outline"
+            className="dark:text-yellow-500"
+            onClick={() => router.push("/leaderboard")}
+          >
+            Leaderboard
+          </Button>
           {!session ? (
             <>
               <Button
