@@ -1,30 +1,52 @@
-// /app/api/leaderboard/route.ts
 import { NextResponse } from "next/server";
 import connectMongo from "@/lib/mongodb";
 import { User } from "@/models/User";
 
-// Get leaderboard route
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+
     await connectMongo();
 
-    // Fetch all users with their names, countries, and totalScore
     const users = await User.find({}, "name country totalScore");
 
-    // Sort the users based on the totalScore (already stored in MongoDB)
     const leaderboard = users
       .map((user: any) => ({
         name: user.name,
         country: user.country,
-        totalScore: user.totalScore || 0, // Safeguard against undefined totalScore
+        totalScore: user.totalScore || 0,
       }))
-      .sort((a, b) => b.totalScore - a.totalScore); // Sort by totalScore in descending order
+      .sort((a, b) => b.totalScore - a.totalScore);
 
-    // return NextResponse.json(leaderboard);
-    return NextResponse.json(leaderboard, {
+    writer.write(`data: ${JSON.stringify(leaderboard)}\n\n`);
+
+    // Here you could implement a mechanism to listen for score updates in your database
+    // For this demo, let's simulate sending updates every 5 seconds
+    const interval = setInterval(async () => {
+      const updatedUsers = await User.find({}, "name country totalScore");
+      const updatedLeaderboard = updatedUsers
+        .map((user: any) => ({
+          name: user.name,
+          country: user.country,
+          totalScore: user.totalScore || 0,
+        }))
+        .sort((a, b) => b.totalScore - a.totalScore);
+
+      writer.write(`data: ${JSON.stringify(updatedLeaderboard)}\n\n`);
+    }, 5000); // Adjust the interval as needed
+
+    // Cleanup
+    req.signal.addEventListener("abort", () => {
+      clearInterval(interval);
+      writer.close();
+    });
+
+    return new Response(readable, {
       headers: {
-        "Cache-Control":
-          "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
       },
     });
   } catch (error) {
@@ -35,41 +57,3 @@ export async function GET() {
     );
   }
 }
-
-// // /app/api/leaderboard/route.ts
-// import { NextResponse } from "next/server";
-// import connectMongo from "@/lib/mongodb";
-// import { User } from "@/models/User";
-
-// // Get leaderboard route
-// export async function GET() {
-//   try {
-//     await connectMongo();
-
-//     // Fetch all users
-//     const users = await User.find({}, "name country scores");
-
-//     // Calculate total scores for each user
-//     const leaderboard = users
-//       .map((user: any) => {
-//         const totalScore = user.scores.reduce(
-//           (acc: number, score: any) => acc + score.score,
-//           0
-//         );
-//         return {
-//           name: user.name,
-//           country: user.country,
-//           totalScore,
-//         };
-//       })
-//       .sort((a, b) => b.totalScore - a.totalScore); // Sort by total score in descending order
-
-//     return NextResponse.json(leaderboard);
-//   } catch (error) {
-//     console.error("Error fetching leaderboard:", error);
-//     return NextResponse.json(
-//       { error: "Failed to load leaderboard" },
-//       { status: 500 }
-//     );
-//   }
-// }
