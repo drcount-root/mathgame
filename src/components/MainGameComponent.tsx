@@ -19,7 +19,7 @@ const MainGameComponent = () => {
   const [level, setLevel] = useState(1);
   const [levelScores, setLevelScores] = useState<number[]>([]); // Store level-wise scores
   const [message, setMessage] = useState<string>("");
-  const { data: session } = useSession();
+  const { data: session }: any = useSession();
 
   const levelTimeLimits = [10, 10, 10]; // Time limits for each level
   const maxTime = levelTimeLimits[level - 1];
@@ -45,7 +45,7 @@ const MainGameComponent = () => {
           setLevelScores((prev) => [...prev, levelScore]); // Store final level score
         }
 
-        if (levelScores.length === 3) {
+        if (levelScores.length === 3 && (session?.user?.totalScore < totalScore)) {
           saveScoresFunction();
         }
 
@@ -178,6 +178,8 @@ const MainGameComponent = () => {
   const progressPercentage = (timeLeft / maxTime) * 100;
 
   console.log("levelScores", levelScores);
+
+  console.log("session?.user", session?.user?.totalScore);
 
   return (
     <div className="flex flex-col items-center justify-center h-[60vh]">
