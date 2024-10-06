@@ -17,6 +17,7 @@ const Leaderboard = () => {
       try {
         const response = await fetch("/api/leaderboard");
         const data = await response.json();
+        console.log("Leaderboard data:", data);
         setLeaderboard(data);
         setLoading(false);
       } catch (error) {
