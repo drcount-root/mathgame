@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       country,
       age,
       scores: [], // Optionally, initialize with default scores
+      totalScore: 0
     });
 
     // Save the new user to MongoDB

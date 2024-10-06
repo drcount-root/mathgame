@@ -66,6 +66,7 @@ const MainGameComponent = () => {
               level: index + 1,
               score: score,
             })),
+            totalScore,
           }),
         });
 
@@ -75,7 +76,10 @@ const MainGameComponent = () => {
 
         const data = await response.json();
         setMessage("Scores updated successfully!");
-        console.log("Scores updated:", data.scores);
+        console.log("Scores updated:", data?.scores);
+        console.log("Total Score updated:", data?.totalScore);
+        // After the API updates, refresh the session
+        refreshSession();
       } catch (error) {
         console.error("Error updating scores:", error);
         setMessage("Failed to update scores. Please try again.");
@@ -84,6 +88,11 @@ const MainGameComponent = () => {
       setMessage("Sign in to save your scores!");
     }
   };
+
+  async function refreshSession() {
+    const event = new Event("visibilitychange");
+    document.dispatchEvent(event); // This triggers next-auth to refresh the session
+  }
 
   const generateQuestion = (level: number) => {
     let numbers: number[] = [];

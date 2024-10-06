@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
     await connectMongo();
 
     // Parse the request body
-    const { scores } = await req.json();
+    const { scores, totalScore } = await req.json();
 
     // Validate the scores data
     if (!Array.isArray(scores) || scores.length === 0) {
@@ -34,7 +34,7 @@ export async function PUT(req: NextRequest) {
     // Update the user's scores in the database
     const updatedUser = await User.findOneAndUpdate(
       { email: session.user.email },
-      { $set: { scores: scores } },
+      { $set: { scores: scores, totalScore: totalScore } },
       { new: true, runValidators: true }
     );
 
@@ -43,7 +43,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Scores updated successfully", scores: updatedUser.scores },
+      { message: "Scores updated successfully", scores: updatedUser.scores, totalScore: updatedUser.totalScore },
       { status: 200 }
     );
   } catch (error) {

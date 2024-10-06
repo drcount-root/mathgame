@@ -14,6 +14,7 @@ interface IUser extends Document {
   country: string;
   age: number;
   scores: IScore[]; // Array of score objects
+  totalScore?: number;
 }
 
 // Create the User schema
@@ -32,7 +33,17 @@ const UserSchema: Schema = new Schema({
     ],
     default: [], // Default is an empty array for new users
   },
+  totalScore: { type: Number, default: 0 },
 });
+
+// // Virtual to calculate the total score from the 'scores' array
+// UserSchema.virtual("totalScore").get(function (this: IUser) {
+//   return this.scores.reduce((total, score) => total + score.score, 0);
+// });
+
+// // To ensure that the virtual fields are included in JSON output
+// UserSchema.set("toJSON", { virtuals: true });
+// UserSchema.set("toObject", { virtuals: true });
 
 // Export the User model (check if model exists to prevent OverwriteModelError in dev)
 export const User =
