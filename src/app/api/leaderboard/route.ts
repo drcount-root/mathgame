@@ -20,7 +20,13 @@ export async function GET() {
       }))
       .sort((a, b) => b.totalScore - a.totalScore); // Sort by totalScore in descending order
 
-    return NextResponse.json(leaderboard);
+    // return NextResponse.json(leaderboard);
+    return NextResponse.json(leaderboard, {
+      headers: {
+        "Cache-Control":
+          "no-store, no-cache, must-revalidate, proxy-revalidate",
+      },
+    });
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
     return NextResponse.json(
@@ -29,7 +35,6 @@ export async function GET() {
     );
   }
 }
-
 
 // // /app/api/leaderboard/route.ts
 // import { NextResponse } from "next/server";
