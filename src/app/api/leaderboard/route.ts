@@ -1,8 +1,5 @@
-import { NextResponse } from "next/server";
 import connectMongo from "@/lib/mongodb";
 import { User } from "@/models/User";
-
-export const dynamic = "force-dynamic";
 
 // SSE Endpoint to send live leaderboard updates
 export async function GET(req: Request) {
@@ -48,11 +45,69 @@ export async function GET(req: Request) {
   return new Response(stream, {
     headers: {
       "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
+      "Cache-Control": "no-cache, no-transform, must-revalidate",
       "Connection": "keep-alive",
+      "Access-Control-Allow-Origin": "*", // CORS headers if necessary
     },
   });
 }
+
+
+// import { NextResponse } from "next/server";
+// import connectMongo from "@/lib/mongodb";
+// import { User } from "@/models/User";
+
+// export const dynamic = "force-dynamic";
+
+// // SSE Endpoint to send live leaderboard updates
+// export async function GET(req: Request) {
+//   const encoder = new TextEncoder();
+
+//   // Create a readable stream for SSE
+//   const stream = new ReadableStream({
+//     async start(controller) {
+//       await connectMongo();
+
+//       const sendLeaderboardUpdates = async () => {
+//         const users = await User.find({}, "name country totalScore");
+
+//         const leaderboard = users
+//           .map((user: any) => ({
+//             name: user.name,
+//             country: user.country,
+//             totalScore: user.totalScore || 0,
+//           }))
+//           .sort((a, b) => b.totalScore - a.totalScore);
+
+//         const leaderboardJson = JSON.stringify(leaderboard);
+
+//         // Send the SSE data
+//         controller.enqueue(encoder.encode(`data: ${leaderboardJson}\n\n`));
+//       };
+
+//       // Send the initial leaderboard
+//       sendLeaderboardUpdates();
+
+//       // Optionally set an interval to send updates every X seconds
+//       const intervalId = setInterval(sendLeaderboardUpdates, 5000);
+
+//       // When the connection is closed, stop the interval
+//       req.signal.addEventListener("abort", () => {
+//         clearInterval(intervalId);
+//         controller.close();
+//       });
+//     },
+//   });
+
+//   // Return the response with the correct headers for SSE
+//   return new Response(stream, {
+//     headers: {
+//       "Content-Type": "text/event-stream",
+//       "Cache-Control": "no-cache, no-transform",
+//       "Connection": "keep-alive",
+//     },
+//   });
+// }
 
 
 // import { NextResponse } from "next/server";
