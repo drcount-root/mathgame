@@ -10,7 +10,7 @@ const AuthLayout = ({
     <main className="max-w-5xl mx-auto">
       <div className="flex flex-col justify-center items-center gap-10">
         <NavBar />
-        <h1 className="text-2xl">Auth routes Outlet</h1>
+        {/* <h1 className="text-2xl">Auth routes Outlet</h1> */}
         {children}
       </div>
     </main>
