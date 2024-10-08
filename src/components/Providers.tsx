@@ -4,6 +4,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Box, CircularProgress } from "@mui/material";
 
 const RouteGuard = () => {
   const router = useRouter();
@@ -31,9 +32,19 @@ const RouteGuard = () => {
   // Show loading state if checking session
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
+      // <div className="flex justify-center items-center h-screen">
+      //   Loading...
+      // </div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
     );
   }
 
