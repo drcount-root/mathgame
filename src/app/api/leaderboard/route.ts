@@ -1,6 +1,8 @@
 import connectMongo from "@/lib/mongodb";
 import { User } from "@/models/User";
 
+export const dynamic = "force-dynamic";
+
 // SSE Endpoint to send live leaderboard updates
 export async function GET(req: Request) {
   const encoder = new TextEncoder();
