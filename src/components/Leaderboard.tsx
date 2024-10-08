@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Box, CircularProgress } from "@mui/material"; // Ensure you're importing Material UI components
 
 interface User {
   name: string;
@@ -7,28 +8,56 @@ interface User {
   totalScore: number;
 }
 
-export const dynamic = "force-dynamic";
-
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true); // Track loading state
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource("/api/leaderboard");
+    // Fetch leaderboard data from the API
+    const fetchLeaderboard = async () => {
+      try {
+        setLoading(true); // Start loading
+        const response = await fetch("/api/leaderboard");
 
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setLeaderboard(data);
+        if (!response.ok) {
+          throw new Error("Failed to fetch leaderboard data");
+        }
+
+        const data = await response.json();
+        setLeaderboard(data);
+        setError(null); // Clear any previous errors
+      } catch (err) {
+        console.error("Error fetching leaderboard data:", err);
+        setError("Error fetching leaderboard data. Please try again later.");
+      } finally {
+        setLoading(false); // Stop loading when fetch is done
+      }
     };
 
-    eventSource.onerror = () => {
-      console.error("SSE connection error");
-      eventSource.close();
-    };
+    fetchLeaderboard();
+  }, []); // Only fetch once when the component mounts
 
-    return () => {
-      eventSource.close();
-    };
-  }, []);
+  // Display loader while fetching data
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Display error message if something went wrong
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="container mx-auto my-10">
@@ -59,9 +88,7 @@ const Leaderboard = () => {
 
 export default Leaderboard;
 
-
 // "use client";
-
 // import { useEffect, useState } from "react";
 
 // interface User {
@@ -72,27 +99,32 @@ export default Leaderboard;
 
 // const Leaderboard = () => {
 //   const [leaderboard, setLeaderboard] = useState<User[]>([]);
-//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
 
 //   useEffect(() => {
+//     // Fetch leaderboard data from the API
 //     const fetchLeaderboard = async () => {
 //       try {
-//         // Add a cache-busting query parameter to the fetch request
-//         const response = await fetch(`/api/leaderboard?_=${new Date().getTime()}`);
+//         const response = await fetch("/api/leaderboard");
+
+//         if (!response.ok) {
+//           throw new Error("Failed to fetch leaderboard data");
+//         }
+
 //         const data = await response.json();
 //         setLeaderboard(data);
-//         setLoading(false);
-//       } catch (error) {
-//         console.error("Failed to fetch leaderboard", error);
-//         setLoading(false);
+//         setError(null); // Clear any previous errors
+//       } catch (err) {
+//         console.error("Error fetching leaderboard data:", err);
+//         setError("Error fetching leaderboard data. Please try again later.");
 //       }
 //     };
 
 //     fetchLeaderboard();
-//   }, []);
+//   }, []); // Only fetch once when the component mounts
 
-//   if (loading) {
-//     return <div>Loading...</div>;
+//   if (error) {
+//     return <div>{error}</div>;
 //   }
 
 //   return (
