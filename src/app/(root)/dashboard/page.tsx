@@ -23,7 +23,7 @@ const page = () => {
 
   if (session) {
     return (
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center md:mx-0 mx-6">
         <h1 className="text-3xl text-yellow-500 font-semibold">
           Welcome to the Dashboard, {session.user?.name}!
         </h1>
