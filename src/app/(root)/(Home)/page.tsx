@@ -15,9 +15,9 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex justify-center items-center my-6 w-full">
-      <div className="px-4 py-8 bg-background text-foreground">
-        <main className="w-[1024px]">
+    <div className="md:flex md:px-0 px-6 justify-center items-center my-6 w-full">
+      <div className="md:px-4 py-8 bg-background text-foreground">
+        <main className="md:w-[1024px]">
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6">
               Features We Are Offering
