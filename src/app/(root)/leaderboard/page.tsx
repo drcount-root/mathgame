@@ -2,7 +2,7 @@ import Leaderboard from "@/components/Leaderboard";
 
 const LeaderboardPage = () => {
   return (
-    <div>
+    <div className="md:mx-0 mx-6">
       <Leaderboard />
     </div>
   );
